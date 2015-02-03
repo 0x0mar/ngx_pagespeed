@@ -935,6 +935,8 @@ void ps_set_conf_cleanup_handler(
 
 void terminate_process_context() {
   if (active_driver_factory != NULL) {
+    // If we got here, that means we are in the cache loader/manager
+    // or did not get a chance to cleanup otherwise.
     delete active_driver_factory;
     active_driver_factory = NULL;
     NgxBaseFetch::Terminate();
@@ -945,6 +947,7 @@ void terminate_process_context() {
 
 void* ps_create_main_conf(ngx_conf_t* cf) {
   if (!process_context_cleanup_hooked) {
+    SystemRewriteDriverFactory::InitApr();
     atexit(terminate_process_context);
     process_context_cleanup_hooked = true;
   }
@@ -2986,7 +2989,6 @@ void ps_exit_child_process(ngx_cycle_t* cycle) {
       ngx_http_cycle_get_module_main_conf(cycle, ngx_pagespeed));
   NgxBaseFetch::Terminate();
   cfg_m->driver_factory->ShutDown();
-  NgxBaseFetch::Terminate();
 }
 
 // Called when nginx forks worker processes.  No threads should be started
@@ -2998,7 +3000,6 @@ ngx_int_t ps_init_child_process(ngx_cycle_t* cycle) {
     return NGX_OK;
   }
 
-  SystemRewriteDriverFactory::InitApr();
   if (!NgxBaseFetch::Initialize(cycle)) {
     return NGX_ERROR;
   }
