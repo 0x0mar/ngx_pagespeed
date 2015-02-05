@@ -280,6 +280,7 @@ STATISTICS_URL=http://$PRIMARY_HOSTNAME/ngx_pagespeed_statistics
 PAGESPEED_EXPECTED_FAILURES="
 ~Override server header in resource flow.~
 ~Override server header in IPRO flow.~
+~server-side includes~
 "
 
 # Some tests are flakey under valgrind. For now, add them to the expected
