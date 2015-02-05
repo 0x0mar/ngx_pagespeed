@@ -1660,6 +1660,17 @@ ngx_int_t ps_resource_handler(ngx_http_request_t* r,
   ps_srv_conf_t* cfg_s = ps_get_srv_config(r);
   ps_request_ctx_t* ctx = ps_get_request_context(r);
 
+  if (ngx_terminate || ngx_exiting) {
+    cfg_s->server_context->message_handler()->Message(
+        kInfo, "ps_resource_handler declining: nginx worker is shutting down");
+
+    if (ctx == NULL) {
+      return NGX_DECLINED;
+    }
+    ps_release_base_fetch(ctx);
+    return NGX_DECLINED;
+  }
+  
   CHECK(!(html_rewrite && (ctx == NULL || ctx->html_rewrite == false)));
 
   if (!html_rewrite &&

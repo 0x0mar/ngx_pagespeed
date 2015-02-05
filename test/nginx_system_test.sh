@@ -1183,10 +1183,6 @@ fi
 
 if $USE_VALGRIND; then
     kill -s quit $VALGRIND_PID
-    if [ "$AB_PID" != "0" ]; then
-        echo "Kill ab (pid: $AB_PID)"
-        killall -s KILL $AB_PID &>/dev/null || true
-    fi
     while pgrep memcheck > /dev/null; do sleep 1; done
     # Clear the previously set trap, we don't need it anymore.
     trap - EXIT
@@ -1195,11 +1191,12 @@ if $USE_VALGRIND; then
     check_not [ -s "$TEST_TMP/valgrind.log" ]
 else
     check_simple "$NGINX_EXECUTABLE" -s quit -c "$PAGESPEED_CONF"
-    if [ "$AB_PID" != "0" ]; then
-        echo "Kill ab (pid: $AB_PID)"
-        killall -s KILL $AB_PID &>/dev/null || true
-    fi
     while pgrep nginx > /dev/null; do sleep 1; done
+fi
+
+if [ "$AB_PID" != "0" ]; then
+    echo "Kill ab (pid: $AB_PID)"
+    killall -s KILL $AB_PID &>/dev/null || true
 fi
 
 start_test Logged output looks healthy.
